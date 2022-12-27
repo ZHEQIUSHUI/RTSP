@@ -3,7 +3,7 @@
 #include <conio.h>
 #endif
 
-//#define RTSPCLIENT_DLL
+// #define RTSPCLIENT_DLL
 
 #ifdef LINUX
 #undef RTSPCLIENT_DLL
@@ -25,7 +25,7 @@
 #include <crtdbg.h>
 #endif
 
-#define mygetch	getch
+#define mygetch getch
 
 #elif defined(LINUX)
 #include <stdint.h>
@@ -34,16 +34,16 @@
 
 int mygetch(void)
 {
-    struct termios oldt,
-    newt;
-    int ch;
-    tcgetattr( STDIN_FILENO, &oldt );
-    newt = oldt;
-    newt.c_lflag &= ~( ICANON | ECHO );
-    tcsetattr( STDIN_FILENO, TCSANOW, &newt );
-    ch = getchar();
-    tcsetattr( STDIN_FILENO, TCSANOW, &oldt );
-    return ch;
+	struct termios oldt,
+		newt;
+	int ch;
+	tcgetattr(STDIN_FILENO, &oldt);
+	newt = oldt;
+	newt.c_lflag &= ~(ICANON | ECHO);
+	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+	ch = getchar();
+	tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+	return ch;
 }
 #endif
 
@@ -55,8 +55,25 @@ static void frameHandlerFunc(void *arg, DLL_RTP_FRAME_TYPE frame_type, __int64 t
 static void frameHandlerFunc(void *arg, RTP_FRAME_TYPE frame_type, int64_t timestamp, unsigned char *buf, int len)
 #endif
 {
+	printf("buffer size = %d\n", len);
 	if (fp_dump)
+	{
+		
+		switch (frame_type)
+		{
+		case FRAME_TYPE_VIDEO:
 		fwrite(buf, len, 1, fp_dump);
+			break;
+		case FRAME_TYPE_AUDIO:
+		printf("audio\n");
+			break;
+		case FRAME_TYPE_ETC:
+		printf("etc\n");
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 int main(int argc, char *argv[])
@@ -71,7 +88,7 @@ int main(int argc, char *argv[])
 #else
 	RTSPCommonEnv::SetDebugFlag(DEBUG_FLAG_RTSP);
 #endif
-	char *strURL = "rtsp://222.96.113.48:4554/AVStream1_2";
+	char *strURL = argv[1];
 
 	fp_dump = fopen("video.264", "wb");
 
@@ -104,7 +121,7 @@ again:
 #endif
 			}
 		}
-	}	
+	}
 exit:
 #ifdef RTSPCLIENT_DLL
 	rtspclient_close_url(rtspClient);
@@ -112,7 +129,7 @@ exit:
 	rtspClient->closeURL();
 #endif
 
-	if (--retry >  0)
+	if (--retry > 0)
 		goto again;
 
 #ifdef RTSPCLIENT_DLL
@@ -121,7 +138,8 @@ exit:
 	delete rtspClient;
 #endif
 
-	if (fp_dump) fclose(fp_dump);
+	if (fp_dump)
+		fclose(fp_dump);
 
 	return 0;
 }

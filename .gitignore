@@ -1,0 +1,5 @@
+objs
+build
+*.o
+*.so
+.vscode
