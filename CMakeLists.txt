@@ -12,6 +12,7 @@ add_library(${LIBRARY_NAME} STATIC
 )
 
 add_definitions(-DLINUX)
+add_definitions(-fPIC)
 
 target_include_directories(${LIBRARY_NAME} PRIVATE include)
 
